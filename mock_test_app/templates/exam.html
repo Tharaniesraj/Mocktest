@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ url_for('submit_exam') }}" id="exam-form">
+        <form action="{{ url_for('submit_exam', exam_id=exam.id) }}" method="post" id="exam-form">
             <input type="hidden" name="exam_id" value="{{ exam.id }}">
             
             {% for question in questions %}
@@ -100,7 +100,7 @@
 
 <script>
     // Timer functionality
-    const examDuration = {{ exam.duration }} * 60; // Convert minutes to seconds
+    const examDuration = { examduration } * 60 ;  // Convert minutes to seconds
     let remainingTime = examDuration;
 
     function updateTimer() {
