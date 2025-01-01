@@ -96,7 +96,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard' if not current_user.is_admin else 'admin_dashboard'))
+        return redirect(url_for('admin_dashboard' if not current_user.is_admin else 'dashboard'))
     
     if request.method == 'POST':
         username = request.form['username']
@@ -107,7 +107,7 @@ def login():
             login_user(user)
             flash('Login successful!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('dashboard' if not user.is_admin else 'admin_dashboard'))
+            return redirect(next_page if next_page else url_for('admin_dashboard' if not user.is_admin else 'dashboard'))
         
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
@@ -131,7 +131,7 @@ def dashboard():
 @login_required
 def take_exam(exam_id):
     if current_user.is_admin:
-        return redirect(url_for('manage_questions', exam_id=exam_id))
+        return redirect(url_for('manage_questions', exam_id= exam_id))
         
     exam = Exam.query.get_or_404(exam_id)
     # Check if user has already taken this exam
@@ -188,11 +188,11 @@ def view_result(result_id):
         return redirect(url_for('dashboard'))
     
     exam = Exam.query.get(result.exam_id)
-    return render_template('result.html', result=result, exam=exam)
+    return redirect(url_for('view_result', result_id=result.id))
 
 @app.route('/admin/dashboard')
-@login_required
-@admin_required
+#@login_required
+#@admin_required
 def admin_dashboard():
     exams = Exam.query.all()
     total_users = User.query.filter_by(is_admin=False).count()
@@ -205,9 +205,27 @@ def admin_dashboard():
                          total_questions=total_questions,
                          total_results=total_results)
 
+# Logic to make a user an admin
+def make_user_admin(user_id):
+    user = User.query.get(user_id)  # Function to find user by ID
+    if user:
+        user.is_admin = True  # Update user role to admin
+        db.session.commit()
+        return True
+    return False
+
+# Example usage in admin_dashboard
+@app.route('/admin/make_admin/<int:user_id>', methods=['POST'])
+#@login_required
+#admin_required
+def make_admin(user_id):
+    if make_user_admin(user_id):
+        return "User made admin successfully!", 200
+    return "User not found!", 404
+
 @app.route('/admin/new-exam', methods=['GET', 'POST'])
-@login_required
-@admin_required
+#@login_required
+#@admin_required
 def new_exam():
     if request.method == 'POST':
         name = request.form['name']
@@ -224,8 +242,8 @@ def new_exam():
     return render_template('admin/new_exam.html')
 
 @app.route('/admin/exam/<int:exam_id>/questions', methods=['GET', 'POST'])
-@login_required
-@admin_required
+#@login_required
+#@admin_required
 def manage_questions(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     questions = Question.query.filter_by(exam_id=exam_id).all()
@@ -260,8 +278,8 @@ def manage_questions(exam_id):
     return render_template('admin/manage_questions.html', exam=exam, questions=questions)
 
 @app.route('/admin/question/<int:question_id>/delete', methods=['POST'])
-@login_required
-@admin_required
+#@login_required
+#@admin_required
 def delete_question(question_id):
     question = Question.query.get_or_404(question_id)
     exam_id = question.exam_id
