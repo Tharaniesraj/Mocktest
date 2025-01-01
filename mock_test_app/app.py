@@ -96,7 +96,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('admin_dashboard' if not current_user.is_admin else 'dashboard'))
+        return redirect(url_for('admin_dashboard' if current_user.is_admin else 'dashboard'))
     
     if request.method == 'POST':
         username = request.form['username']
@@ -107,7 +107,7 @@ def login():
             login_user(user)
             flash('Login successful!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('admin_dashboard' if not user.is_admin else 'dashboard'))
+            return redirect(next_page if next_page else url_for('admin_dashboard' if user.is_admin else 'dashboard'))
         
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
@@ -188,7 +188,7 @@ def view_result(result_id):
         return redirect(url_for('dashboard'))
     
     exam = Exam.query.get(result.exam_id)
-    return redirect(url_for('view_result', result_id=result.id))
+    return render_template('result.html', score=result.score, total_questions=result.total_questions, correct_answers=result.score / 100 * result.total_questions)
 
 @app.route('/admin/dashboard')
 #@login_required
