@@ -3,7 +3,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import os
+from functools import wraps
+from flask import abort
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'KSR_MOCK_TEST_APP_SECRET_KEY'
@@ -96,7 +97,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('admin_dashboard' if not current_user.is_admin else 'dashboard'))
+        return redirect(url_for('admin_dashboard' if current_user.is_admin else 'dashboard'))
     
     if request.method == 'POST':
         username = request.form['username']
@@ -107,7 +108,7 @@ def login():
             login_user(user)
             flash('Login successful!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('admin_dashboard' if not user.is_admin else 'dashboard'))
+            return redirect(next_page if next_page else url_for('admin_dashboard' if user.is_admin else 'dashboard'))
         
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
@@ -188,11 +189,11 @@ def view_result(result_id):
         return redirect(url_for('dashboard'))
     
     exam = Exam.query.get(result.exam_id)
-    return redirect(url_for('view_result', result_id=result.id))
+    return render_template('result.html', score=result.score, total_questions=result.total_questions, correct_answers=result.score / 100 * result.total_questions)
 
 @app.route('/admin/dashboard')
-#@login_required
-#@admin_required
+@login_required
+@admin_required
 def admin_dashboard():
     exams = Exam.query.all()
     total_users = User.query.filter_by(is_admin=False).count()
@@ -216,16 +217,16 @@ def make_user_admin(user_id):
 
 # Example usage in admin_dashboard
 @app.route('/admin/make_admin/<int:user_id>', methods=['POST'])
-#@login_required
-#admin_required
+@login_required
+@admin_required
 def make_admin(user_id):
     if make_user_admin(user_id):
         return "User made admin successfully!", 200
     return "User not found!", 404
 
 @app.route('/admin/new-exam', methods=['GET', 'POST'])
-#@login_required
-#@admin_required
+@login_required
+@admin_required
 def new_exam():
     if request.method == 'POST':
         name = request.form['name']
@@ -242,8 +243,8 @@ def new_exam():
     return render_template('admin/new_exam.html')
 
 @app.route('/admin/exam/<int:exam_id>/questions', methods=['GET', 'POST'])
-#@login_required
-#@admin_required
+@login_required
+@admin_required
 def manage_questions(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     questions = Question.query.filter_by(exam_id=exam_id).all()
@@ -278,8 +279,8 @@ def manage_questions(exam_id):
     return render_template('admin/manage_questions.html', exam=exam, questions=questions)
 
 @app.route('/admin/question/<int:question_id>/delete', methods=['POST'])
-#@login_required
-#@admin_required
+@login_required
+@admin_required
 def delete_question(question_id):
     question = Question.query.get_or_404(question_id)
     exam_id = question.exam_id

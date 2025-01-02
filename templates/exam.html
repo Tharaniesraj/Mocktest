@@ -11,7 +11,7 @@
                     </h2>
                     <div id="timer" class="badge bg-primary p-2">
                         <i class="fas fa-clock me-1"></i>
-                        <span id="time-display">Loading...</span>
+                        <span id="time-display"></span>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
 
 <script>
     // Timer functionality
-    const examDuration = { examduration } * 60 ;  // Convert minutes to seconds
+    const examDuration = {{ exam.duration }} * 60; // exam duration in seconds
     let remainingTime = examDuration;
 
     function updateTimer() {
@@ -115,6 +115,7 @@
         }
 
         if (remainingTime <= 0) {
+            window.location.href = '/dashboard';
             document.getElementById('exam-form').submit();
         } else {
             remainingTime--;
@@ -124,15 +125,5 @@
 
     // Start the timer
     updateTimer();
-
-    // Warn before leaving page
-    window.onbeforeunload = function() {
-        return "Are you sure you want to leave? Your progress will be lost!";
-    };
-
-    // Remove warning when submitting form
-    document.getElementById('exam-form').onsubmit = function() {
-        window.onbeforeunload = null;
-    };
 </script>
 {% endblock %}
