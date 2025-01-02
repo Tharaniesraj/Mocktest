@@ -4,10 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
+from datetime import datetime
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'KSR_MOCK_TEST_APP_SECRET_KEY'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mock_test.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'KSR_MOCK_TEST_APP_SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///mock_test.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -50,6 +51,7 @@ class ExamResult(db.Model):
     exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
     score = db.Column(db.Float, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
+    date_taken = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -72,24 +74,42 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
         
-        # Check if user already exists
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not all([username, email, password, confirm_password]):
+            flash('Please fill in all fields', 'error')
+            return redirect(url_for('register'))
+            
+        if password != confirm_password:
+            flash('Passwords do not match', 'error')
+            return redirect(url_for('register'))
+            
         if User.query.filter_by(username=username).first():
-            flash('Username already exists')
+            flash('Username already exists. Please choose another.', 'error')
+            return redirect(url_for('register'))
+            
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered. Please use another email.', 'error')
             return redirect(url_for('register'))
         
-        # Create new user
-        new_user = User(username=username, email=email)
-        new_user.set_password(password)
-        db.session.add(new_user)
-        db.session.commit()
-        
-        flash('Registration successful!')
-        return redirect(url_for('login'))
+        try:
+            new_user = User(username=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred during registration. Please try again.', 'error')
+            return redirect(url_for('register'))
     
     return render_template('register.html')
 
@@ -99,17 +119,28 @@ def login():
         return redirect(url_for('dashboard' if not current_user.is_admin else 'admin_dashboard'))
     
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if not username or not password:
+            flash('Please provide both username and password', 'error')
+            return redirect(url_for('login'))
+            
         user = User.query.filter_by(username=username).first()
         
-        if user and user.check_password(password):
-            login_user(user)
-            flash('Login successful!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('dashboard' if not user.is_admin else 'admin_dashboard'))
+        if user is None:
+            flash('Username not found. Please check your username or register.', 'error')
+            return redirect(url_for('login'))
+            
+        if not user.check_password(password):
+            flash('Incorrect password. Please try again.', 'error')
+            return redirect(url_for('login'))
         
-        flash('Invalid username or password', 'danger')
+        login_user(user)
+        flash('Login successful!', 'success')
+        next_page = request.args.get('next')
+        return redirect(next_page if next_page else url_for('dashboard' if not user.is_admin else 'admin_dashboard'))
+    
     return render_template('login.html')
 
 @app.route('/dashboard')
@@ -153,41 +184,61 @@ def submit_exam(exam_id):
     if current_user.is_admin:
         flash('Administrators cannot take exams.', 'warning')
         return redirect(url_for('admin_dashboard'))
-        
+    
+    # Check if the user has already taken this exam
+    existing_result = ExamResult.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
+    if existing_result:
+        flash('You have already taken this exam.', 'warning')
+        return redirect(url_for('view_result', result_id=existing_result.id))
+    
     exam = Exam.query.get_or_404(exam_id)
     questions = Question.query.filter_by(exam_id=exam_id).all()
+    
+    if not questions:
+        flash('This exam has no questions.', 'error')
+        return redirect(url_for('dashboard'))
     
     score = 0
     total_questions = len(questions)
     
+    # Calculate score
     for question in questions:
         answer = request.form.get(f'question_{question.id}')
-        if answer and answer == question.correct_answer:
+        if answer and answer.upper() == question.correct_answer.upper():
             score += 1
     
     percentage = (score / total_questions) * 100 if total_questions > 0 else 0
     
-    result = ExamResult(
-        user_id=current_user.id,
-        exam_id=exam_id,
-        score=percentage,
-        total_questions=total_questions
-    )
-    db.session.add(result)
-    db.session.commit()
-    
-    flash(f'Exam submitted successfully! Your score: {percentage:.1f}%', 'success')
-    return redirect(url_for('view_result', result_id=result.id))
+    # Save result
+    try:
+        result = ExamResult(
+            user_id=current_user.id,
+            exam_id=exam_id,
+            score=percentage,
+            total_questions=total_questions,
+            date_taken=datetime.utcnow()
+        )
+        db.session.add(result)
+        db.session.commit()
+        
+        flash(f'Exam submitted successfully! Your score: {percentage:.1f}%', 'success')
+        return redirect(url_for('view_result', result_id=result.id))
+    except Exception as e:
+        db.session.rollback()
+        flash('Error submitting exam. Please try again.', 'error')
+        return redirect(url_for('dashboard'))
 
 @app.route('/result/<int:result_id>')
 @login_required
 def view_result(result_id):
     result = ExamResult.query.get_or_404(result_id)
+    
+    # Only allow viewing own results unless admin
     if result.user_id != current_user.id and not current_user.is_admin:
-        flash('You do not have permission to view this result.', 'danger')
+        flash('You do not have permission to view this result.', 'error')
         return redirect(url_for('dashboard'))
     
-    exam = Exam.query.get(result.exam_id)
+    exam = Exam.query.get_or_404(result.exam_id)
     return render_template('result.html', result=result, exam=exam)
 
 @app.route('/admin/dashboard')

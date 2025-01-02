@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ url_for('submit_exam') }}" id="exam-form">
+        <form method="POST" action="{{ url_for('submit_exam', exam_id=exam.id) }}" id="exam-form">
             <input type="hidden" name="exam_id" value="{{ exam.id }}">
             
             {% for question in questions %}
@@ -99,31 +99,27 @@
 </style>
 
 <script>
-    // Timer functionality
-    const examDuration = {{ exam.duration }} * 60; // Convert minutes to seconds
-    let remainingTime = examDuration;
-
+    // Initialize timer duration in seconds
+    let timeLeft = {{ exam.duration * 60 }};
+    
     function updateTimer() {
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = remainingTime % 60;
-        document.getElementById('time-display').innerHTML = 
-            `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-        if (remainingTime <= 300) { // Last 5 minutes
-            document.getElementById('timer').classList.remove('bg-primary');
-            document.getElementById('timer').classList.add('bg-danger');
-        }
-
-        if (remainingTime <= 0) {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('time-display').textContent = 
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
             document.getElementById('exam-form').submit();
         } else {
-            remainingTime--;
+            timeLeft--;
             setTimeout(updateTimer, 1000);
         }
     }
 
-    // Start the timer
-    updateTimer();
+    // Start the timer when page loads
+    window.onload = function() {
+        updateTimer();
+    };
 
     // Warn before leaving page
     window.onbeforeunload = function() {
