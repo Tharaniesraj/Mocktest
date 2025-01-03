@@ -101,6 +101,7 @@ def login():
     
     if request.method == 'POST':
         username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
         
@@ -311,6 +312,32 @@ def delete_exam(exam_id):
     
     flash('Exam deleted successfully!', 'success')
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/submit-questions', methods=['POST'])
+def submit_questions():
+    # Extract data from the form
+    exam_id = request.form.get('exam_id')
+    questions = request.form.getlist('question[]')
+    optionsA = request.form.getlist('optionA[]')
+    optionsB = request.form.getlist('optionB[]')
+    optionsC = request.form.getlist('optionC[]')
+    optionsD = request.form.getlist('optionD[]')
+    correct_answers = request.form.getlist('correctAnswer[]')
+
+    for i in range(len(questions)):
+        new_question = Question(
+            exam_id=exam_id,
+            text=questions[i],
+            option_a=optionsA[i],
+            option_b=optionsB[i],
+            option_c=optionsC[i],
+            option_d=optionsD[i],
+            correct_answer=correct_answers[i]
+        )
+        db.session.add(new_question)
+    db.session.commit()
+
+    return redirect(url_for('index'))  # Ensure this matches your route
 
 @app.route('/logout')
 @login_required
