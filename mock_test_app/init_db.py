@@ -49,17 +49,19 @@ def init_database():
                 exam_id=competitive_exam.id,
                 text='Who is the father of the Indian Constitution?',
                 option_a='Mahatma Gandhi',
-                option_b='Dr. B.R. Ambedkar',
-                option_c='Jawaharlal Nehru',
+                option_b='Jawaharlal Nehru',
+                option_c='B.R. Ambedkar',
                 option_d='Sardar Patel',
-                correct_answer='B'
+                correct_answer='C'
             )
         ]
-        
-        for question in questions:
-            db.session.add(question)
+        db.session.bulk_save_objects(questions)
         db.session.commit()
-        print('Database initialized successfully!')
+
+        print("Database initialized successfully!")
+        print("Admin credentials:")
+        print("Username: admin")
+        print("Password: admin123")
 
 if __name__ == '__main__':
     init_database()

@@ -27,67 +27,28 @@
             </div>
 
             <!-- Add Question Form -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">Add New Question</h3>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="text" class="form-label">Question Text</label>
-                            <textarea class="form-control" id="text" name="text" rows="3" required 
-                                    placeholder="Enter your question here..."></textarea>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="option_a" class="form-label">Option A</label>
-                                <input type="text" class="form-control" id="option_a" name="option_a" required
-                                       placeholder="Enter option A">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="option_b" class="form-label">Option B</label>
-                                <input type="text" class="form-control" id="option_b" name="option_b" required
-                                       placeholder="Enter option B">
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="option_c" class="form-label">Option C</label>
-                                <input type="text" class="form-control" id="option_c" name="option_c" required
-                                       placeholder="Enter option C">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="option_d" class="form-label">Option D</label>
-                                <input type="text" class="form-control" id="option_d" name="option_d" required
-                                       placeholder="Enter option D">
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="correct_answer" class="form-label">Correct Answer</label>
-                            <select class="form-select" id="correct_answer" name="correct_answer" required>
-                                <option value="" disabled selected>Select correct option</option>
-                                <option value="A">Option A</option>
-                                <option value="B">Option B</option>
-                                <option value="C">Option C</option>
-                                <option value="D">Option D</option>
-                            </select>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between">
-                            <button type="submit" name="add_another" value="1" class="btn btn-primary">
-                                Save & Add Another
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                Save & Finish
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
+            <form id="questions-form" enctype="multipart/form-data" method="POST" action="/submit-questions">
+                <input type="hidden" name="exam_id" value="{{ exam.id }}" />
+                <div id="questions-container">
+                    <div class="question-item">
+                        <input type="text" name="question[]" placeholder="Enter your question" required />
+                        <input type="text" name="optionA[]" placeholder="Option A" required />
+                        <input type="text" name="optionB[]" placeholder="Option B" required />
+                        <input type="text" name="optionC[]" placeholder="Option C" required />
+                        <input type="text" name="optionD[]" placeholder="Option D" required />
+                        <input type="text" name="correctAnswer[]" placeholder="Correct Answer (A/B/C/D)" required />
+                    </div>
+                </div> 
+                <hr>
+                
+                <label for="file-upload">Upload Questions File:</label>
+                <input type="file" id="file-upload" accept=".txt" onchange="handleFileUpload(event)" />
+                <div id="preview"></div>
+                <button type="submit">Submit Questions</button>
+            </form>
+            
+            <button class="hint-button" onclick="redirectToHint('https://docs.google.com/spreadsheets/d/1jzR32TFEVOzUfK8a-FL9wVz-NEQrQtM4U4E48zOk2A4/edit?usp=sharing')">Show Hint</button>
+            
             <!-- Existing Questions -->
             {% if questions %}
             <div class="card shadow-sm">
@@ -115,6 +76,13 @@
                                                 <i class="fas fa-trash"></i> Delete
                                             </button>
                                         </form>
+                                        
+                                        <div class="question-container" data-hint="This is a hint for the question.">
+                                            
+                                            <a href="https://docs.google.com/spreadsheets/d/1jzR32TFEVOzUfK8a-FL9wVz-NEQrQtM4U4E48zOk2A4/edit?usp=sharing" class="btn btn-primary btn-sm">Show Hint</a>
+                                            <div class="hint-display"></div>
+                                        </div>
+                            
                                     </div>
                                     <div class="list-group">
                                         <div class="list-group-item {% if question.correct_answer == 'A' %}list-group-item-success{% endif %}">
@@ -141,4 +109,91 @@
         </div>
     </div>
 </div>
+<script>
+    function addQuestion() {
+        const questionsContainer = document.getElementById('questions-container');
+        const newQuestionItem = document.createElement('div');
+        newQuestionItem.className = 'question-item';
+        newQuestionItem.innerHTML = `
+            <input type='text' name='question[]' placeholder='Enter your question' required />
+            <input type='text' name='optionA[]' placeholder='Option A' required />
+            <input type='text' name='optionB[]' placeholder='Option B' required />
+            <input type='text' name='optionC[]' placeholder='Option C' required />
+            <input type='text' name='optionD[]' placeholder='Option D' required />
+        `;
+        questionsContainer.appendChild(newQuestionItem);
+    }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+    
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+                const questionsContainer = document.getElementById('questions-container');
+                const previewContainer = document.getElementById('preview');
+                const examId = document.querySelector('input[name="exam_id"]').value;
+                
+                // Clear previous content
+                questionsContainer.innerHTML = ''; 
+                previewContainer.innerHTML = '';
+    
+                let validQuestions = 0;
+                let invalidQuestions = 0;
+    
+                // Process questions in batches of 6 lines
+                for (let i = 0; i < lines.length; i += 6) {
+                    if (i + 5 >= lines.length) break;
+    
+                    const question = lines[i]?.trim();
+                    const optionA = lines[i + 1]?.trim();
+                    const optionB = lines[i + 2]?.trim();
+                    const optionC = lines[i + 3]?.trim();
+                    const optionD = lines[i + 4]?.trim();
+                    const correctAnswer = lines[i + 5]?.trim().toUpperCase();
+    
+                    // Validate question and options
+                    if (question && optionA && optionB && optionC && optionD && 
+                        ['A', 'B', 'C', 'D'].includes(correctAnswer)) {
+                        const questionItem = document.createElement('div');
+                        questionItem.className = 'question-item';
+                        questionItem.innerHTML = `
+                            <input type="hidden" name="exam_id" value="${examId}" />
+                            <input type='text' name='question[]' value='${question}' required />
+                            <input type='text' name='optionA[]' value='${optionA}' required />
+                            <input type='text' name='optionB[]' value='${optionB}' required />
+                            <input type='text' name='optionC[]' value='${optionC}' required />
+                            <input type='text' name='optionD[]' value='${optionD}' required />
+                            <input type='hidden' name='correctAnswer[]' value='${correctAnswer}' />
+                        `;
+                        questionsContainer.appendChild(questionItem);
+                        validQuestions++;
+                    } else {
+                        invalidQuestions++;
+                    }
+                }
+    
+                // Show preview and validation results
+                previewContainer.innerHTML = `
+                    <div class="alert ${validQuestions > 0 ? 'alert-success' : 'alert-warning'}">
+                        Uploaded ${validQuestions} valid questions
+                        ${invalidQuestions > 0 ? `(${invalidQuestions} invalid questions skipped)` : ''}
+                    </div>
+                `;
+            };
+    
+            reader.onerror = function() {
+                alert('Error reading file. Please check the file format and try again.');
+            };
+    
+            reader.readAsText(file);
+        }
+</script>
+<script>
+    function redirectToHint(url) {
+        window.location.href = url;
+    }
+</script>
 {% endblock %}

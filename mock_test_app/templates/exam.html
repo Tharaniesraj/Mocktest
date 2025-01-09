@@ -11,7 +11,7 @@
                     </h2>
                     <div id="timer" class="badge bg-primary p-2">
                         <i class="fas fa-clock me-1"></i>
-                        <span id="time-display">Loading...</span>
+                        <span id="time-display"></span>
                     </div>
                 </div>
             </div>
@@ -24,11 +24,7 @@
             </div>
         </div>
 
-<<<<<<< HEAD
-        <form method="POST" action="{{ url_for('submit_exam', exam_id=exam.id) }}" id="exam-form">
-=======
         <form action="{{ url_for('submit_exam', exam_id=exam.id) }}" method="post" id="exam-form">
->>>>>>> 039da30caaaef5dbe991cbdb036f744fc537313c
             <input type="hidden" name="exam_id" value="{{ exam.id }}">
             
             {% for question in questions %}
@@ -38,8 +34,9 @@
                         <span class="badge bg-primary me-2">Q{{ loop.index }}</span>
                         {{ question.text }}
                     </h5>
-                    
-                    <div class="options-list mt-3">
+                    <button class="hint-button" onclick="redirectToHint('https://docs.google.com/spreadsheets/d/1jzR32TFEVOzUfK8a-FL9wVz-NEQrQtM4U4E48zOk2A4/edit?usp=sharing')" >Show Hint</button>
+
+                   <div class="options-list mt-3">
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="question_{{ question.id }}" 
                                    id="option_a_{{ question.id }}" value="A" required>
@@ -103,43 +100,37 @@
 </style>
 
 <script>
-<<<<<<< HEAD
-    // Initialize timer duration in seconds
-    let timeLeft = {{ exam.duration * 60 }};
-    
-=======
     // Timer functionality
-    const examDuration = { examduration } * 60 ;  // Convert minutes to seconds
+    const examDuration = {{ exam.duration }} * 60; // exam duration in seconds
     let remainingTime = examDuration;
 
->>>>>>> 039da30caaaef5dbe991cbdb036f744fc537313c
     function updateTimer() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        document.getElementById('time-display').textContent = 
-            `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (timeLeft <= 0) {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        document.getElementById('time-display').innerHTML = 
+            `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+        if (remainingTime <= 300) { // Last 5 minutes
+            document.getElementById('timer').classList.remove('bg-primary');
+            document.getElementById('timer').classList.add('bg-danger');
+        }
+
+        if (remainingTime <= 0) {
+            window.location.href = '/dashboard';
             document.getElementById('exam-form').submit();
         } else {
-            timeLeft--;
+            remainingTime--;
             setTimeout(updateTimer, 1000);
         }
     }
 
-    // Start the timer when page loads
-    window.onload = function() {
-        updateTimer();
-    };
+    // Start the timer
+    updateTimer();
+</script>
 
-    // Warn before leaving page
-    window.onbeforeunload = function() {
-        return "Are you sure you want to leave? Your progress will be lost!";
-    };
-
-    // Remove warning when submitting form
-    document.getElementById('exam-form').onsubmit = function() {
-        window.onbeforeunload = null;
-    };
+<script>
+    function redirectToHint(url) {
+        window.location.href = url;
+    }
 </script>
 {% endblock %}
