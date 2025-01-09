@@ -116,7 +116,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard' if not current_user.is_admin else 'admin_dashboard'))
+        return redirect(url_for('admin_dashboard' if current_user.is_admin else 'dashboard'))
     
     if request.method == 'POST':
         username = request.form.get('username')
@@ -128,19 +128,13 @@ def login():
             
         user = User.query.filter_by(username=username).first()
         
-        if user is None:
-            flash('Username not found. Please check your username or register.', 'error')
-            return redirect(url_for('login'))
-            
-        if not user.check_password(password):
-            flash('Incorrect password. Please try again.', 'error')
-            return redirect(url_for('login'))
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Login successful!', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page if next_page else url_for('dashboard' if not user.is_admin else 'admin_dashboard'))
         
-        login_user(user)
-        flash('Login successful!', 'success')
-        next_page = request.args.get('next')
-        return redirect(next_page if next_page else url_for('dashboard' if not user.is_admin else 'admin_dashboard'))
-    
+        flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
 @app.route('/dashboard')
@@ -162,7 +156,7 @@ def dashboard():
 @login_required
 def take_exam(exam_id):
     if current_user.is_admin:
-        return redirect(url_for('manage_questions', exam_id=exam_id))
+        return redirect(url_for('manage_questions', exam_id= exam_id))
         
     exam = Exam.query.get_or_404(exam_id)
     # Check if user has already taken this exam
@@ -238,7 +232,7 @@ def view_result(result_id):
         flash('You do not have permission to view this result.', 'error')
         return redirect(url_for('dashboard'))
     
-    exam = Exam.query.get_or_404(result.exam_id)
+    exam = Exam.query.get(result.exam_id)
     return render_template('result.html', result=result, exam=exam)
 
 @app.route('/admin/dashboard')
@@ -255,6 +249,24 @@ def admin_dashboard():
                          total_users=total_users,
                          total_questions=total_questions,
                          total_results=total_results)
+
+# Logic to make a user an admin
+def make_user_admin(user_id):
+    user = User.query.get(user_id)  # Function to find user by ID
+    if user:
+        user.is_admin = True  # Update user role to admin
+        db.session.commit()
+        return True
+    return False
+
+# Example usage in admin_dashboard
+@app.route('/admin/make_admin/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def make_admin(user_id):
+    if make_user_admin(user_id):
+        return "User made admin successfully!", 200
+    return "User not found!", 404
 
 @app.route('/admin/new-exam', methods=['GET', 'POST'])
 @login_required
