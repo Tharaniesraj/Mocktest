@@ -5,11 +5,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from functools import wraps
 from flask import abort
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'KSR_MOCK_TEST_APP_SECRET_KEY'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mock_test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
+app.config['ALLOWED_EXTENSIONS'] = {'txt', 'csv'}
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -56,6 +60,14 @@ class ExamResult(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def allowed_file(filename):
+    """Check if the file has an allowed extension."""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 # Admin required decorator
 def admin_required(f):
     @wraps(f)
@@ -70,6 +82,21 @@ def admin_required(f):
 @app.route('/')
 def index():
     return render_template('index.html')
+def is_valid_college_email(email):
+    """
+    Validate if the email belongs to a college domain.
+    Add your specific college domains here.
+    """
+    # List of allowed college email domains
+    allowed_domains = [
+        '@ksriet.ac.in',  # Replace with your specific college domains
+        '@ksrce.ac.in',
+        
+        # Add more college domains as needed
+    ]
+    
+    return any(email.lower().endswith(domain) for domain in allowed_domains)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -78,11 +105,16 @@ def register():
         email = request.form['email']
         password = request.form['password']
         
+        if not is_valid_college_email(email):
+            flash('Registration is only allowed with a college email address.', 'danger')
+            return redirect(url_for('register'))
+
         # Check if user already exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists')
             return redirect(url_for('register'))
         
+
         # Create new user
         new_user = User(username=username, email=email)
         new_user.set_password(password)
@@ -97,19 +129,24 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('admin_dashboard' if current_user.is_admin else 'dashboard'))
+        return redirect(url_for('admin_dashboard' if current_user.is_admin else 'welcome'))
     
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        
+        # Validate college email domain during login
+        if not is_valid_college_email(email):
+            flash('Login is only allowed with a college email address.', 'danger')
+            return redirect(url_for('login'))
         user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password):
             login_user(user)
             flash('Login successful!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('admin_dashboard' if user.is_admin else 'dashboard'))
+            return redirect(next_page if next_page else url_for('admin_dashboard' if user.is_admin else 'welcome'))
         
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
@@ -169,14 +206,6 @@ def submit_exam(exam_id):
     
     percentage = (score / total_questions) * 100 if total_questions > 0 else 0
     
-    # Debugging print statements
-    print(f"Submitting Exam:")
-    print(f"Exam ID: {exam_id}")
-    print(f"User ID: {current_user.id}")
-    print(f"Total Questions: {total_questions}")
-    print(f"Correct Answers: {score}")
-    print(f"Percentage: {percentage}")
-    
     result = ExamResult(
         user_id=current_user.id,
         exam_id=exam_id,
@@ -197,21 +226,9 @@ def view_result(result_id):
         flash('You do not have permission to view this result.', 'danger')
         return redirect(url_for('dashboard'))
     
-    exam = Exam.query.get_or_404(result.exam_id)
-    
-    # Debugging print statements
-    print(f"Result ID: {result_id}")
-    print(f"User ID: {result.user_id}")
-    print(f"Exam ID: {result.exam_id}")
-    print(f"Score: {result.score}")
-    print(f"Total Questions: {result.total_questions}")
-    print(f"Exam Name: {exam.name}")
-    
-    return render_template('result.html', 
-                           score=result.score, 
-                           total_questions=result.total_questions, 
-                           correct_answers=result.score / 100 * result.total_questions,
-                           exam=exam)
+    exam = Exam.query.get(result.exam_id)
+    return render_template('result.html', score=result.score, total_questions=result.total_questions, correct_answers=result.score / 100 * result.total_questions)
+
 @app.route('/admin/dashboard')
 @login_required
 @admin_required
@@ -270,6 +287,7 @@ def manage_questions(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     questions = Question.query.filter_by(exam_id=exam_id).all()
     
+
     if request.method == 'POST':
         text = request.form['text']
         option_a = request.form['option_a']
@@ -335,6 +353,7 @@ def delete_exam(exam_id):
 
 @app.route('/submit-questions', methods=['POST'])
 def submit_questions():
+
     # Extract data from the form
     exam_id = request.form.get('exam_id')
     questions = request.form.getlist('question[]')

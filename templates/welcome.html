@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="text-center mt-4">
+        <h2>Choose Your Exam</h2>
+        <a href="{{ url_for('gate') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-rocket me-2"></i>GATE
+        </a>
+        <a href="{{ url_for('tnpsc') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-rocket me-2"></i>TNPSC
+        </a>
+    </div>

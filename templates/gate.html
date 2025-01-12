@@ -1,0 +1,11 @@
+            <form action="{{ url_for('gate') }}" method="post">
+                <div class="mb-3">
+                    <label for="subjects" class="form-label">Select Subjects</label>
+                    <select name="subjects" id="subjects" class="form-select" multiple>
+                        {% for subject in available_subjects %}
+                            <option value="{{ subject }}">{{ subject }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>

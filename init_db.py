@@ -9,7 +9,7 @@ def init_database():
         # Create admin user
         admin = User(
             username='admin',
-            email='admin@ksr.edu',
+            email='admin@ksriet.ac.in',
             is_admin=True
         )
         admin.set_password('admin123')
