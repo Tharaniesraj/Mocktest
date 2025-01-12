@@ -59,9 +59,6 @@ def init_database():
         db.session.commit()
 
         print("Database initialized successfully!")
-        print("Admin credentials:")
-        print("Username: admin")
-        print("Password: admin123")
-
+        
 if __name__ == '__main__':
     init_database()

@@ -121,7 +121,17 @@
                                     <i class="fas fa-dashboard"></i> Admin Dashboard
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('courses') }}">
+                                    <i class="fas fa-dashboard"></i> Manage Courses
+                                </a>
+                            </li>
                         {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('welcome') }}">
+                                    <i class="fas fa-book"></i> Courses
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('dashboard') }}">
                                     <i class="fas fa-book"></i> My Exams

@@ -97,6 +97,71 @@ def is_valid_college_email(email):
     
     return any(email.lower().endswith(domain) for domain in allowed_domains)
 
+# routings of pages
+
+@app.route('/welcome')
+def welcome():
+    return render_template('welcome.html')
+
+@app.route('/gate')
+def gate():
+    return render_template('gate.html')
+
+@app.route('/tnpsc')
+def tnpsc():
+    return render_template('tnpsc.html')
+
+@app.route('/branches/cse')
+def cse():
+    return render_template('branches/cse.html')
+
+@app.route('/branches/ece')
+def ece():
+    return render_template('branches/ece.html')
+
+@app.route('/branches/eee')
+def eee():
+    return render_template('branches/eee.html')
+
+@app.route('/branches/bme')
+def bme():
+    return render_template('branches/bme.html')
+
+@app.route('/branches/mech')
+def mech():
+    return render_template('branches/mech.html')
+
+@app.route('/branches/it')
+def it():
+    return render_template('branches/it.html')
+
+@app.route('/branches/cs')
+def cs():
+    return render_template('branches/cs.html')
+
+@app.route('/branches/group1')
+def group1():
+    return render_template('branches/group1.html')
+
+@app.route('/branches/group2')
+def group2():
+    return render_template('branches/group2.html')
+
+@app.route('/branches/group3')
+def group3():
+    return render_template('branches/group3.html')  
+
+@app.route('/branches/group4')
+def group4():
+    return render_template('branches/group4.html')   
+
+@app.route('/branches/upsc')
+def upsc():
+    return render_template('branches/upsc.html')
+
+@app.route('/admin/courses')
+def courses():
+    return render_template('admin/courses.html')    
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -122,7 +187,7 @@ def register():
         db.session.commit()
         
         flash('Registration successful!')
-        return redirect(url_for('login'))
+        return redirect(url_for('welcome'))
     
     return render_template('register.html')
 

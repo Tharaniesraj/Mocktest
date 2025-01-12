@@ -1,11 +1,32 @@
-            <form action="{{ url_for('gate') }}" method="post">
-                <div class="mb-3">
-                    <label for="subjects" class="form-label">Select Subjects</label>
-                    <select name="subjects" id="subjects" class="form-select" multiple>
-                        {% for subject in available_subjects %}
-                            <option value="{{ subject }}">{{ subject }}</option>
-                        {% endfor %}
-                    </select>
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action="{{ url_for('gate') }}" method="post">
+                <div class="col-12 text-center">
+                    <h2 class=>Available Subjects</h2>
+                    <a href="{{ url_for('cse') }}" class="btn btn-primary btn-lg mx-2">
+                        <i class="fas fa-book"></i> CSE
+                    </a>
+                    <a href="{{ url_for('it') }}" class="btn btn-primary btn-lg mx-2">
+                        <i class="fas fa-book"></i> IT
+                    </a>
+                    <a href="{{ url_for('eee') }}" class="btn btn-primary btn-lg mx-2">
+                        <i class="fas fa-book"></i> EEE
+                    </a>
+                    <a href="{{ url_for('ece') }}" class="btn btn-primary btn-lg mx-2">
+                        <i class="fas fa-book"></i> ECE
+                    </a>
+                    <a href="{{ url_for('bme') }}" class="btn btn-primary btn-lg mx-2">
+                        <i class="fas fa-book"></i> BME
+                    </a>
+                    <a href="{{ url_for('mech') }}" class="btn btn-primary btn-lg mx-2">
+                        <i class="fas fa-book"></i> MECH
+                    </a>
+                    <a href="{{ url_for('cs') }}" class="btn btn-primary btn-lg mx-2">
+                        <i class="fas fa-book"></i> CYBER SECURITY
+                    </a>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+
+{% endblock %}
