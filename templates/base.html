@@ -18,6 +18,13 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background-image: url("{{ url_for('static', filename='images/background.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-blend-mode: overlay;
+            background-color: rgba(255, 255, 255, 0.9);
         }
 
         .navbar {
@@ -98,10 +105,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="KSR College of Engineering" height="80" class="me-3" style="object-fit: contain; background-color: white; padding: 5px; border-radius: 4px;">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="KSR College of Engineering" height="80" class="me-2" style="object-fit: contain; background-color: white; padding: 5px; border-radius: 4px;">
                 <div class="d-none d-md-block">
-                    <h4 class="mb-0 text-white">Center For Competitive Exams</h4>
-                    <p class="mb-0 text-light small">Preparation</p>
+                    <h4 class="mb-0 text-white ms-1">Center For Competitive Exams</h4>
+                    <p class="mb-0 text-light small ms-1">Preparation</p>
                 </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

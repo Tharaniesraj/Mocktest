@@ -7,6 +7,7 @@ from functools import wraps
 from flask import abort
 import os
 from werkzeug.utils import secure_filename
+import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'KSR_MOCK_TEST_APP_SECRET_KEY'
@@ -82,22 +83,6 @@ def admin_required(f):
 @app.route('/')
 def index():
     return render_template('index.html')
-def is_valid_college_email(email):
-    """
-    Validate if the email belongs to a college domain.
-    Add your specific college domains here.
-    """
-    # List of allowed college email domains
-    allowed_domains = [
-        '@ksriet.ac.in',  # Replace with your specific college domains
-        '@ksrce.ac.in',
-        
-        # Add more college domains as needed
-    ]
-    
-    return any(email.lower().endswith(domain) for domain in allowed_domains)
-
-# routings of pages
 
 @app.route('/welcome')
 def welcome():
@@ -198,13 +183,8 @@ def login():
     
     if request.method == 'POST':
         username = request.form['username']
-        email = request.form['email']
         password = request.form['password']
         
-        # Validate college email domain during login
-        if not is_valid_college_email(email):
-            flash('Login is only allowed with a college email address.', 'danger')
-            return redirect(url_for('login'))
         user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password):
@@ -417,31 +397,79 @@ def delete_exam(exam_id):
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/submit-questions', methods=['POST'])
+@login_required
+@admin_required
 def submit_questions():
-
-    # Extract data from the form
+    if not current_user.is_authenticated or not current_user.is_admin:
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('login'))
+    
     exam_id = request.form.get('exam_id')
+    
+    # Handle file upload
+    if 'file' in request.files:
+        file = request.files['file']
+        if file and file.filename != '':
+            # Secure filename
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            
+            # Parse the uploaded file
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    questions_data = f.readlines()
+                
+                questions_added = 0
+                # Process questions from file
+                for line_num, line in enumerate(questions_data, 1):
+                    # Try multiple delimiters
+                    parts = [p.strip() for p in re.split(r'[,\t|]', line.strip())]
+                    
+                    # More flexible parsing
+                    if len(parts) >= 6:
+                        try:
+                            new_question = Question(
+                                exam_id=exam_id,
+                                text=parts[0],
+                                option_a=parts[1],
+                                option_b=parts[2],
+                                option_c=parts[3],
+                                option_d=parts[4],
+                                correct_answer=parts[5].upper()  # Ensure A, B, C, or D
+                            )
+                            db.session.add(new_question)
+                            questions_added += 1
+                        except Exception as question_error:
+                            print(f"Error processing line {line_num}: {line}")
+                            print(f"Error details: {question_error}")
+                
+                db.session.commit()
+                flash(f'Successfully uploaded {questions_added} questions from file!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                print(f"File upload error: {e}")
+                flash(f'Error processing file: {str(e)}', 'danger')
+    
+    # Handle manual question entry
     questions = request.form.getlist('question[]')
-    optionsA = request.form.getlist('optionA[]')
-    optionsB = request.form.getlist('optionB[]')
-    optionsC = request.form.getlist('optionC[]')
-    optionsD = request.form.getlist('optionD[]')
-    correct_answers = request.form.getlist('correctAnswer[]')
-
-    for i in range(len(questions)):
-        new_question = Question(
-            exam_id=exam_id,
-            text=questions[i],
-            option_a=optionsA[i],
-            option_b=optionsB[i],
-            option_c=optionsC[i],
-            option_d=optionsD[i],
-            correct_answer=correct_answers[i]
-        )
-        db.session.add(new_question)
-    db.session.commit()
-
-    return redirect(url_for('index'))  # Ensure this matches your route
+    if questions:
+        for i in range(len(questions)):
+            new_question = Question(
+                exam_id=exam_id,
+                text=request.form.getlist('question[]')[i],
+                option_a=request.form.getlist('optionA[]')[i],
+                option_b=request.form.getlist('optionB[]')[i],
+                option_c=request.form.getlist('optionC[]')[i],
+                option_d=request.form.getlist('optionD[]')[i],
+                correct_answer=request.form.getlist('correctAnswer[]')[i]
+            )
+            db.session.add(new_question)
+        
+        db.session.commit()
+        flash('Questions added successfully!', 'success')
+    
+    return redirect(url_for('manage_questions', exam_id=exam_id))
 
 @app.route('/logout')
 @login_required
