@@ -124,6 +124,38 @@ def it():
 def cs():
     return render_template('branches/cs.html')
 
+@app.route('/branches/ce')
+def ce():
+    return render_template('branches/ce.html')
+
+@app.route('/branches/mba')
+def mba():
+    return render_template('branches/mba.html')
+
+@app.route('/branches/mca')
+def mca():
+    return render_template('branches/mca.html')
+
+@app.route('/branches/ae')
+def ae():
+    return render_template('branches/ae.html')
+
+@app.route('/branches/sfe') 
+def sfe():
+    return render_template('branches/sfe.html') 
+
+@app.route('/branches/iot')
+def iot():
+    return render_template('branches/iot.html')
+
+@app.route('/branches/csd')
+def csd():
+    return render_template('branches/csd.html')
+
+@app.route('/branches/me')
+def me():
+    return render_template('branches/me.html')        
+
 @app.route('/branches/group1')
 def group1():
     return render_template('branches/group1.html')
