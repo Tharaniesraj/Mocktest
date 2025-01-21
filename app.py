@@ -180,6 +180,11 @@ def upsc():
 def courses():
     return render_template('admin/courses.html')    
 
+def is_valid_college_email(email):
+    # Check if the email ends with '@college'
+    return email.endswith('@ksriet.ac.in') or email.endswith('@ksrce.ac.in')
+    
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -187,6 +192,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
         
+        # Check if email is a college email
         if not is_valid_college_email(email):
             flash('Registration is only allowed with a college email address.', 'danger')
             return redirect(url_for('register'))
