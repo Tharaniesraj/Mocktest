@@ -124,6 +124,38 @@ def it():
 def cs():
     return render_template('branches/cs.html')
 
+@app.route('/branches/ce')
+def ce():
+    return render_template('branches/ce.html')
+
+@app.route('/branches/mba')
+def mba():
+    return render_template('branches/mba.html')
+
+@app.route('/branches/mca')
+def mca():
+    return render_template('branches/mca.html')
+
+@app.route('/branches/ae')
+def ae():
+    return render_template('branches/ae.html')
+
+@app.route('/branches/sfe') 
+def sfe():
+    return render_template('branches/sfe.html') 
+
+@app.route('/branches/iot')
+def iot():
+    return render_template('branches/iot.html')
+
+@app.route('/branches/csd')
+def csd():
+    return render_template('branches/csd.html')
+
+@app.route('/branches/me')
+def me():
+    return render_template('branches/me.html')        
+
 @app.route('/branches/group1')
 def group1():
     return render_template('branches/group1.html')
@@ -148,6 +180,11 @@ def upsc():
 def courses():
     return render_template('admin/courses.html')    
 
+def is_valid_college_email(email):
+    # Check if the email ends with '@college'
+    return email.endswith('@ksriet.ac.in') or email.endswith('@ksrce.ac.in')
+    
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -155,6 +192,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
         
+        # Check if email is a college email
         if not is_valid_college_email(email):
             flash('Registration is only allowed with a college email address.', 'danger')
             return redirect(url_for('register'))
