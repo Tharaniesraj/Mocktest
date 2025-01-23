@@ -128,4 +128,61 @@
     </div>
 </div>
 
+<!-- Exam Countdown Timer Section -->
+<div class="container mt-4">
+    <div class="row text-center">
+        <div class="col-12">
+            <h2 class="mb-4">Next Exam Countdown</h2>
+            <div id="exam-countdown" class="alert alert-info" role="alert">
+                <div class="row">
+                    <div class="col-3">
+                        <h3 id="days">12</h3>
+                        <p>Days</p>
+                    </div>
+                    <div class="col-3">
+                        <h3 id="hours">00</h3>
+                        <p>Hours</p>
+                    </div>
+                    <div class="col-3">
+                        <h3 id="minutes">00</h3>
+                        <p>Minutes</p>
+                    </div>
+                    <div class="col-3">
+                        <h3 id="seconds">00</h3>
+                        <p>Seconds</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // Set the date of the next exam (you can modify this dynamically)
+    const nextExamDate = new Date("2024-07-15T09:00:00").getTime();
+
+    const countdownFunction = setInterval(function() {
+        const now = new Date().getTime();
+        const timeRemaining = nextExamDate - now;
+
+        const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+        document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+        document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+        document.getElementById("minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+
+        if (timeRemaining < 0) {
+            clearInterval(countdownFunction);
+            document.getElementById("exam-countdown").innerHTML = "EXAM IS ONGOING!";
+        }
+    }, 1000);
+</script>
 {% endblock %}
