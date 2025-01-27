@@ -31,46 +31,7 @@
                 <div id="questions-container">
                     <div class="question-item">
                         <input type="hidden" name="exam_id" value="{{ exam.id }}">
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <input type="text" name="question[]" class="form-control" placeholder="Enter your question" required />
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <input type="text" name="optionA[]" class="form-control" placeholder="Option A" required />
-                            </div>
-                            <div class="col-6">
-                                <input type="text" name="optionB[]" class="form-control" placeholder="Option B" required />
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <input type="text" name="optionC[]" class="form-control" placeholder="Option C" required />
-                            </div>
-                            <div class="col-6">
-                                <input type="text" name="optionD[]" class="form-control" placeholder="Option D" required />
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <select name="correctAnswer[]" class="form-control" required>
-                                    <option value="">Select Correct Answer</option>
-                                    <option value="A">Option A</option>
-                                    <option value="B">Option B</option>
-                                    <option value="C">Option C</option>
-                                    <option value="D">Option D</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <button type="button" class="btn btn-secondary" onclick="addQuestion()">
-                        <i class="fas fa-plus"></i> Add Another Question
-                    </button>
-                </div>
+                    
 
                 <div class="mb-3">
                     <label class="btn btn-primary">

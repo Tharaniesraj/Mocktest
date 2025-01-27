@@ -20,7 +20,7 @@ def init_database():
         competitive_exam = Exam(
             name='KSR Engineering Competitive Exam',
             description='Mock test for competitive engineering entrance',
-            duration=60  # 60 minutes
+            duration=1  # 60 minutes
         )
         db.session.add(competitive_exam)
         db.session.commit()
