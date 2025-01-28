@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}KSR Mock Test{% endblock %}
+{% block title %}Mock Test App{% endblock %}
 
 {% block content %}
 <div class="welcome-section">
     <div class="container text-center">
+        <h2>KSR College OF Engineering</h2>
         <h1 class="display-4 mb-3">Welcome to Career Guidance Through Competitive Exams</h1>
         <p class="lead mb-4">Prepare for your exams with our comprehensive mock test system</p>
         {% if not current_user.is_authenticated %}
