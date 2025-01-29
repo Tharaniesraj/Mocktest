@@ -84,6 +84,10 @@ def admin_required(f):
 def index():
     return render_template('index.html')
 
+@app.route('/library')
+def library():
+    return render_template('library.html')
+
 @app.route('/welcome')
 def welcome():
     return render_template('welcome.html')

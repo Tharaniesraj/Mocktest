@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+</style>
+
+<div class="train" align="center">
+    <h2>LIBRARY BOOKS AVAILABLE </h2>
+    <table>
+        <tr>
+          <th>ACCESS NO</th> 
+          <th>TITLE</th>
+          <th>AUTHOR</th>
+          <th>Publisher/Edition</th>
+          <th>YEAR</th>
+        </tr>
+        <tr>
+          <td>19685</td>
+          <td>Alfreds Futterkiste</td>
+          <td>Maria Anders</td>
+          <td>Germany</td>
+          <td>2021</td>
+        </tr>
+        <tr>
+            <td>19686</td>
+          <td>Centro comercial Moctezuma</td>
+          <td>Francisco Chang</td>
+          <td>Mexico</td>
+          <td>2020</td>
+        </tr>
+        <tr>
+            <td>19687</td>
+          <td>Ernst Handel</td>
+          <td>Roland Mendel</td>
+          <td>Austria</td>
+          <td>2019</td>
+        </tr>
+        <tr>
+            <td>19688</td>
+          <td>Island Trading</td>
+          <td>Helen Bennett</td>
+          <td>UK</td>
+          <td>2022</td>
+        </tr>
+        <tr>
+            <td>19689</td>
+          <td>Laughing Bacchus Winecellars</td>
+          <td>Yoshi Tannamuri</td>
+          <td>Canada</td>
+          <td>2020</td>
+        </tr>
+        <tr>
+            <td>19690</td>
+          <td>Magazzini Alimentari Riuniti</td>
+          <td>Giovanni Rovelli</td>
+          <td>Italy</td>
+          <td>2021</td>
+        </tr>
+      </table>
+         
+      
+</div>
+    
+
+{% endblock %}
