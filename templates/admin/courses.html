@@ -1,30 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
+  
+     <div class="exams" align = "center">
+        <h1>Manage Courses & Exams</h1>
 
-    <h1>Manage Courses & Exams</h1>
-    <hr>
-    <div class="row g-3">
-        {% for course in courses %}
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        {{ course.name }}
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ course.description }}</p>
-                        <a href="{{ url_for('admin.edit_course', course_id=course.id) }}" class="btn btn-primary">Edit</a>
-                    </div>
-                    <div class="card-footer">
-                        <ul class="list-group list-group-flush">
-                            {% for branch in course.branches %}
-                                <li class="list-group-item">{{ branch.name }}</li>
-                            {% endfor %}
-                        </ul>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+      
+
+     </div>  
+
 
 
 {% endblock %}

@@ -82,6 +82,7 @@ def admin_required(f):
 # Routes
 @app.route('/')
 def index():
+    
     return render_template('index.html')
 
 @app.route('/library')

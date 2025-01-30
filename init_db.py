@@ -1,11 +1,12 @@
-from app import app, db, User, Exam, Question
+import sqlite3
+from app import app, db, User
 from flask import Flask
 
 def init_database():
     with app.app_context():
         # Create tables
         db.create_all()
-
+                
         # Create admin user
         admin = User(
             username='admin',
