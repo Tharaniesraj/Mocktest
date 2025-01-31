@@ -4,6 +4,14 @@
 
 <form action="{{ url_for('gate') }}" method="post">
     <div class="container">
+        
+        <!-- Countdown Timer Section -->
+         <div class="row justify-content-center mt-4">
+            <div class="col-12 text-center">
+                <p id="demo" style="font-size: 60px; background-color: gold;"></p>
+            </div>
+        </div>
+
         <div class="row text-center mb-4">
             <h2>Available Departments</h2>
         </div>
@@ -24,6 +32,9 @@
                 </a>
                 <a href="{{ url_for('it') }}" class="btn btn-primary btn-lg">
                     <i class="fas fa-book"></i> IT
+                </a>
+                <a href="{{ url_for('aids') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-book"></i> AIDS
                 </a>
             </div>
         </div>
@@ -65,11 +76,12 @@
             </div>
         </div>
 
-        <!-- Countdown Timer Section -->
-        <div class="row justify-content-center mt-4">
-            <div class="col-12 text-center">
-                <p id="demo" style="font-size: 60px; background-color: gold;"></p>
-            </div>
+       
+        <div class="link" align = "center" class="btn btn-primary btn-lg mx-2" style="background-color: blue; color: white; font-size: 20px; margin: 70px; ">
+    
+            <a class="nav-link" href="https://gate2025.iitr.ac.in/">
+            <i class="fas fa-link"></i> GATE OFFICIAL WEBSITE
+            </a>
         </div>
     </div>
 </form>

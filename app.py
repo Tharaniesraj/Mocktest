@@ -159,7 +159,11 @@ def csd():
 
 @app.route('/branches/me')
 def me():
-    return render_template('branches/me.html')        
+    return render_template('branches/me.html')
+
+@app.route('/branches/aids')
+def aids():
+    return render_template('branches/aids.html')
 
 @app.route('/branches/group1')
 def group1():
