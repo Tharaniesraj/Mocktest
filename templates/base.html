@@ -30,7 +30,7 @@
 
         .navbar {
             background-color: var(--primary-color) !important;
-            padding: 50px 1rem;
+            padding: 0.0rem 0.5rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
@@ -106,7 +106,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
      
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='images/ksr.jpg') }}" alt="KSR College of Engineering" height="80" class="me-2" style="object-fit: contain; background-color: white; padding: 5px; border-radius: 4px;">
+                <img src="{{ url_for('static', filename='images/ccelogo.jpg') }}" alt="KSR College of Engineering" height="80" class="me-2" style="object-fit: contain; background-color: white; padding: 5px; border-radius: 4px;">
                 <div class="d-none d-md-block">
                     <h4 class="mb-0 text-white ms-1">Centre For Guidance & Competitive Exams</h4>
                     <p class="mb-0 text-light small ms-1">Preparation</p>
@@ -188,28 +188,18 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container text-center">
-            <p class="mb-0">&copy; 2025 KSR College of Engineering. All rights reserved.</p>
-        
-        <li align="left">
-            <a href="{{ url_for('index') }}" style="color: white">Home</a>
-        </li>
-        <li align="right">
-           <a href="https://ksrce.ac.in/" style="color: white">KSRCE Official</a> 
-        </li>
-        <li align="right">
-            <a href = "https://ksriet.ac.in/" style="color: white">KSRIET Official</a>
-        </li>
-        <li align = "right">
-            <a href = "https://gate2025.iitr.ac.in/" style="color: white">GATE Official</a>
-
-        </li>
-        <li align = "right">
-            <a href = "https://upsc.gov.in/" style="color: white">UPSC Official</a>
-        </li>
-        <li align = "right">
-            <a href = "https://www.tnpsc.gov.in/" style="color: white">TNPSC Official</a>
-        </li>
-    </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="mb-0">&copy; 2025 KSR College of Engineering. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="{{ url_for('index') }}" class="me-2" style="color: white">Home</a> | 
+                    <a href="https://ksrce.ac.in/" class="me-2" style="color: white">KSRCE Official</a> | 
+                    <a href="https://ksriet.ac.in/" class="me-2" style="color: white">KSRIET Official</a> | 
+                    <a href="https://gate2025.iitr.ac.in/" class="me-2" style="color: white">GATE Official</a> | 
+                    <a href="https://upsc.gov.in/" class="me-2" style="color: white">UPSC Official</a> | 
+                    <a href="https://www.tnpsc.gov.in/" style="color: white">TNPSC Official</a>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <!-- Scripts -->

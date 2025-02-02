@@ -47,9 +47,9 @@
                                     <h6 class="card-title mb-0">Average Score</h6>
                                     <h2 class="mt-2 mb-0">
                                         {% if completed_exams %}
-                                            {{ "%.1f"|format(completed_exams|map(attribute='score')|sum / completed_exams|length) }}%
+                                            {{ (completed_exams|sum(attribute='score') / completed_exams|length)|int }}
                                         {% else %}
-                                            0.0%
+                                            0
                                         {% endif %}
                                     </h2>
                                 </div>
@@ -123,7 +123,7 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Test Name</th>
+                                        <th>Exam Name</th>
                                         <th>Score</th>
                                         <th>Questions</th>
                                         <th>Action</th>
@@ -136,7 +136,7 @@
                                             <td>{{ exam.name }}</td>
                                             <td>
                                                 <span class="badge bg-{{ 'success' if result.score >= 70 else 'warning' if result.score >= 40 else 'danger' }}">
-                                                    {{ "%.1f"|format(result.score) }}%
+                                                    {{ result.score|int }}%
                                                 </span>
                                             </td>
                                             <td>{{ result.total_questions }}</td>

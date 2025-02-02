@@ -319,7 +319,10 @@ def view_result(result_id):
         return redirect(url_for('dashboard'))
     
     exam = Exam.query.get(result.exam_id)
-    return render_template('result.html', score=result.score, total_questions=result.total_questions, correct_answers=result.score / 100 * result.total_questions)
+    return render_template('result.html', 
+        score=int(result.score), 
+        total_questions=result.total_questions, 
+        correct_answers=int(result.score / 100 * result.total_questions))
 
 @app.route('/admin/dashboard')
 @login_required
@@ -548,12 +551,12 @@ def student_rankings():
             percentage = (result.score / result.total_questions * 100)
             
             rankings.append({
-                'rank': idx,
+                'rank': int(idx),
                 'username': user.username,
                 'exam_name': exam.name,
-                'score': result.score,
-                'total_questions': result.total_questions,
-                'percentage': round(percentage, 2)
+                'score': int(result.score),
+                'total_questions': int(result.total_questions),
+                'percentage': int(percentage)
             })
     
     return render_template('student_rankings.html', rankings=rankings)

@@ -17,7 +17,7 @@
                         {% else %}bg-danger
                         {% endif %} 
                         text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <span class="display-4">{{ "%.1f"|format(score) }}%</span>
+                        <span class="display-4">{{ score|int }}%</span>
                     </div>
                     
                     <h3 class="mb-3">
@@ -44,7 +44,7 @@
                         <div class="card bg-success text-white">
                             <div class="card-body">
                                 <h5 class="card-title">Correct Answers</h5>
-                                <p class="display-6">{{ correct_answers }}</p>
+                                <p class="display-6">{{ correct_answers|int }}</p>
                             </div>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                         <div class="card bg-danger text-white">
                             <div class="card-body">
                                 <h5 class="card-title">Incorrect Answers</h5>
-                                <p class="display-6">{{ total_questions - correct_answers }}</p>
+                                <p class="display-6">{{ (total_questions - correct_answers)|int }}</p>
                             </div>
                         </div>
                     </div>
