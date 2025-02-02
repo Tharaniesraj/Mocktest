@@ -518,6 +518,46 @@ def submit_questions():
     
     return redirect(url_for('manage_questions', exam_id=exam_id))
 
+@app.route('/student_rankings')
+@login_required
+def student_rankings():
+    # Get all exam results and sort them by percentage in descending order
+    exam_results = ExamResult.query.all()
+    
+    # Create a list to store ranking information
+    rankings = []
+    
+    # Group results by exam and calculate rankings
+    exams = Exam.query.all()
+    for exam in exams:
+        exam_specific_results = [
+            result for result in exam_results 
+            if result.exam_id == exam.id
+        ]
+        
+        # Sort results by score percentage in descending order
+        sorted_results = sorted(
+            exam_specific_results, 
+            key=lambda x: (x.score / x.total_questions * 100), 
+            reverse=True
+        )
+        
+        # Add rank to each result
+        for idx, result in enumerate(sorted_results, 1):
+            user = User.query.get(result.user_id)
+            percentage = (result.score / result.total_questions * 100)
+            
+            rankings.append({
+                'rank': idx,
+                'username': user.username,
+                'exam_name': exam.name,
+                'score': result.score,
+                'total_questions': result.total_questions,
+                'percentage': round(percentage, 2)
+            })
+    
+    return render_template('student_rankings.html', rankings=rankings)
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -528,5 +568,4 @@ if __name__ == '__main__':
     # Ensure the database is created
     with app.app_context():
         db.create_all()
-    
-    app.run(debug=True)
+        app.run(debug=True)
