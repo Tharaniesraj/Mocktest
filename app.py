@@ -1,90 +1,42 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_sqlalchemy import SQLAlchemy
+from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from functools import wraps
-from flask import abort
 import os
-from werkzeug.utils import secure_filename
 import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'KSR_MOCK_TEST_APP_SECRET_KEY'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mock_test.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['Mongodb_DATABASE_URI'] = 'mongodb+srv://CCEHEAD:CCEHEAD@mocktest.fofsz.mongodb.net/?retryWrites=true&w=majority&appName=MockTest'
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'txt', 'csv'}
 
-db = SQLAlchemy(app)
+# MongoDB configuration
+client = MongoClient(app.config['Mongodb_DATABASE_URI'])
+db = client['mock_test_db']  # Replace with your database name
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 # Database Models
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
-    
+class User(UserMixin):
+    def __init__(self, username, email, password_hash, is_admin=False):
+        self.username = username
+        self.email = email
+        self.password_hash = password_hash
+        self.is_admin = is_admin
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-class Exam(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    duration = db.Column(db.Integer)  # in minutes
-
-class Question(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
-    text = db.Column(db.Text, nullable=False)
-    option_a = db.Column(db.String(255), nullable=False)
-    option_b = db.Column(db.String(255), nullable=False)
-    option_c = db.Column(db.String(255), nullable=False)
-    option_d = db.Column(db.String(255), nullable=False)
-    correct_answer = db.Column(db.String(1), nullable=False)
-
-class ExamResult(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
-    score = db.Column(db.Float, nullable=False)
-    total_questions = db.Column(db.Integer, nullable=False)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-# Ensure upload directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-def allowed_file(filename):
-    """Check if the file has an allowed extension."""
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-# Admin required decorator
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
-            flash('You need to be an admin to access this page.')
-            return redirect(url_for('index'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-# Routes
 @app.route('/')
 def index():
     
     return render_template('index.html')
-
 @app.route('/library')
 def library():
     return render_template('library.html')
@@ -192,7 +144,32 @@ def courses():
 def is_valid_college_email(email):
     # Check if the email ends with '@college'
     return email.endswith('@ksriet.ac.in') or email.endswith('@ksrce.ac.in')
-    
+
+# User loader
+@login_manager.user_loader
+def load_user(user_id):
+    user_data = db.users.find_one({"_id": user_id})  # Fetch user from MongoDB
+    if user_data:
+        return User(user_data['username'], user_data['email'], user_data['password_hash'], user_data['is_admin'])
+    return None
+
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def allowed_file(filename):
+    """Check if the file has an allowed extension."""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# Admin required decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('You need to be an admin to access this page.')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -207,16 +184,18 @@ def register():
             return redirect(url_for('register'))
 
         # Check if user already exists
-        if User.query.filter_by(username=username).first():
+        if db.users.find_one({"username": username}):
             flash('Username already exists')
             return redirect(url_for('register'))
         
-
         # Create new user
-        new_user = User(username=username, email=email)
-        new_user.set_password(password)
-        db.session.add(new_user)
-        db.session.commit()
+        new_user = {
+            'username': username,
+            'email': email,
+            'password_hash': generate_password_hash(password),
+            'is_admin': False
+        }
+        db.users.insert_one(new_user)  # Insert new user into MongoDB
         
         flash('Registration successful!')
         return redirect(url_for('welcome'))
@@ -232,15 +211,20 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        user = User.query.filter_by(username=username).first()
+        user_data = db.users.find_one({"username": username})
         
-        if user and user.check_password(password):
-            login_user(user)
-            flash('Login successful!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('admin_dashboard' if user.is_admin else 'welcome'))
-        
-        flash('Invalid username or password', 'danger')
+        if user_data:
+            if check_password_hash(user_data['password_hash'], password):
+                user = User(user_data['username'], user_data['email'], user_data['password_hash'], user_data['is_admin'])
+                login_user(user)
+                flash('Login successful!', 'success')
+                next_page = request.args.get('next')
+                return redirect(next_page if next_page else url_for('admin_dashboard' if user.is_admin else 'welcome'))
+            else:
+                flash('Invalid password', 'danger')
+        else:
+            flash('Username not found', 'danger')
+    
     return render_template('login.html')
 
 @app.route('/dashboard')
@@ -249,9 +233,9 @@ def dashboard():
     if current_user.is_admin:
         return redirect(url_for('admin_dashboard'))
     
-    available_exams = Exam.query.all()
-    completed_exams = ExamResult.query.filter_by(user_id=current_user.id).all()
-    completed_exam_ids = [result.exam_id for result in completed_exams]
+    available_exams = list(db.exams.find())  # Fetch all exams from MongoDB
+    completed_exams = list(db.exam_results.find({"user_id": current_user.id}))  # Fetch completed exams
+    completed_exam_ids = [result['exam_id'] for result in completed_exams]
     
     return render_template('dashboard.html', 
                          available_exams=available_exams,
@@ -262,22 +246,27 @@ def dashboard():
 @login_required
 def take_exam(exam_id):
     if current_user.is_admin:
-        return redirect(url_for('manage_questions', exam_id= exam_id))
+        return redirect(url_for('manage_questions', exam_id=exam_id))
         
-    exam = Exam.query.get_or_404(exam_id)
+    exam = db.exams.find_one({"_id": exam_id})  # Fetch exam from MongoDB
+    if not exam:
+        flash('Exam not found.', 'warning')
+        return redirect(url_for('dashboard'))
+    
     # Check if user has already taken this exam
-    previous_result = ExamResult.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
+    previous_result = db.exam_results.find_one({"user_id": current_user.id, "exam_id": exam_id})
     if previous_result:
         flash('You have already taken this exam. View your results below.', 'info')
-        return redirect(url_for('view_result', result_id=previous_result.id))
+        return redirect(url_for('view_result', result_id=previous_result['_id']))
     
-    questions = Question.query.filter_by(exam_id=exam_id).all()
+    questions = list(db.questions.find({"exam_id": exam_id}))  # Fetch questions for the exam
     if not questions:
         flash('This exam has no questions yet.', 'warning')
         return redirect(url_for('dashboard'))
     
     return render_template('exam.html', exam=exam, questions=questions)
 
+# Additional routes will also need to be updated similarly...
 @app.route('/exam/<int:exam_id>/submit', methods=['POST'])
 @login_required
 def submit_exam(exam_id):
@@ -568,7 +557,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # Ensure the database is created
-    with app.app_context():
-        db.create_all()
-        app.run(debug=True)
+    app.run(debug=True)
