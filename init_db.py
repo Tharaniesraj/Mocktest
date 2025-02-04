@@ -1,11 +1,12 @@
 from app import app, User
 from flask import Flask
 from pymongo import MongoClient
-from werkzeug.security import generate_password_hash
+import bcrypt
 
 # MongoDB configuration
 client = MongoClient('mongodb+srv://CCEHEAD:CCEHEAD@mocktest.fofsz.mongodb.net/?retryWrites=true&w=majority&appName=MockTest')
 db = client['mock_test_db']  # Replace with your database name
+password = 'admin123'
 
 def init_database():
     with app.app_context():
@@ -14,7 +15,7 @@ def init_database():
             'username': 'admin',
             'email': 'admin@ksriet.ac.in',
             'is_admin': True,
-            'password_hash': generate_password_hash('admin123')  # Ensure to import this function
+            'password_hash': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())  # Ensure to import this function
         }
         db.users.insert_one(admin)  # Insert admin user into MongoDB
 

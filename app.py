@@ -1,42 +1,68 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
-from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
 import re
+import bcrypt
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'KSR_MOCK_TEST_APP_SECRET_KEY'
 app.config['Mongodb_DATABASE_URI'] = 'mongodb+srv://CCEHEAD:CCEHEAD@mocktest.fofsz.mongodb.net/?retryWrites=true&w=majority&appName=MockTest'
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'txt', 'csv'}
+app.config['SESSION_PROTECTION'] = 'strong'
+
 
 # MongoDB configuration
 client = MongoClient(app.config['Mongodb_DATABASE_URI'])
 db = client['mock_test_db']  # Replace with your database name
 
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 # Database Models
 class User(UserMixin):
-    def __init__(self, username, email, password_hash, is_admin=False):
+     def __init__(self, username, email, password_hash, is_admin, user_id):
         self.username = username
         self.email = email
         self.password_hash = password_hash
         self.is_admin = is_admin
+        self.user_id = user_id  # Assuming user_id is passed when the user is created
+    
+     def get_id(self):
+                return str(self.user_id)  # Return user_id as a string
+     
+@login_manager.user_loader
+def load_user(user_id):
+    print(f"Loading user with ID: {user_id}")
+    user_data = db.users.find_one({"_id": user_id})
+    if user_data:
+        return User(user_data['username'], user_data['email'], user_data['password_hash'], user_data['is_admin'], user_data['_id'])
+    return None
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+def allowed_file(filename):
+    """Check if the file has an allowed extension."""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# Admin required decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('You need to be an admin to access this page.')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 def index():
-    
     return render_template('index.html')
+
 @app.route('/library')
 def library():
     return render_template('library.html')
@@ -145,32 +171,7 @@ def is_valid_college_email(email):
     # Check if the email ends with '@college'
     return email.endswith('@ksriet.ac.in') or email.endswith('@ksrce.ac.in')
 
-# User loader
-@login_manager.user_loader
-def load_user(user_id):
-    user_data = db.users.find_one({"_id": user_id})  # Fetch user from MongoDB
-    if user_data:
-        return User(user_data['username'], user_data['email'], user_data['password_hash'], user_data['is_admin'])
-    return None
-
-# Ensure upload directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-def allowed_file(filename):
-    """Check if the file has an allowed extension."""
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-# Admin required decorator
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
-            flash('You need to be an admin to access this page.')
-            return redirect(url_for('index'))
-        return f(*args, **kwargs)
-    return decorated_function
-
+# Register for user
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -185,14 +186,17 @@ def register():
 
         # Check if user already exists
         if db.users.find_one({"username": username}):
-            flash('Username already exists')
-            return redirect(url_for('register'))
-        
+            flash('Username already exists.', 'danger')
+            return render_template('register.html')
+       
+        # Hash the password with bcrypt
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
         # Create new user
         new_user = {
             'username': username,
             'email': email,
-            'password_hash': generate_password_hash(password),
+            'password_hash': hashed_password,
             'is_admin': False
         }
         db.users.insert_one(new_user)  # Insert new user into MongoDB
@@ -202,6 +206,7 @@ def register():
     
     return render_template('register.html')
 
+# Inside your login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -211,15 +216,17 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
+        # Find the user from the database
         user_data = db.users.find_one({"username": username})
         
         if user_data:
-            if check_password_hash(user_data['password_hash'], password):
-                user = User(user_data['username'], user_data['email'], user_data['password_hash'], user_data['is_admin'])
+            # Check if the password matches the hashed password stored in the database
+            if bcrypt.checkpw(password.encode('utf-8'), user_data['password_hash']):
+                user = User(user_data['username'], user_data['email'], user_data['password_hash'], user_data['is_admin'],user_data['_id'])
                 login_user(user)
                 flash('Login successful!', 'success')
                 next_page = request.args.get('next')
-                return redirect(next_page if next_page else url_for('admin_dashboard' if user.is_admin else 'welcome'))
+                return redirect(next_page or url_for('admin_dashboard' if user.is_admin else 'welcome'))
             else:
                 flash('Invalid password', 'danger')
         else:
@@ -227,6 +234,7 @@ def login():
     
     return render_template('login.html')
 
+# route for dashboard
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -241,6 +249,7 @@ def dashboard():
                          available_exams=available_exams,
                          completed_exams=completed_exams,
                          completed_exam_ids=completed_exam_ids)
+
 
 @app.route('/exam/<int:exam_id>')
 @login_required
@@ -266,7 +275,7 @@ def take_exam(exam_id):
     
     return render_template('exam.html', exam=exam, questions=questions)
 
-# Additional routes will also need to be updated similarly...
+
 @app.route('/exam/<int:exam_id>/submit', methods=['POST'])
 @login_required
 def submit_exam(exam_id):
