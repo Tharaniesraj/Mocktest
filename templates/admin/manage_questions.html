@@ -42,6 +42,13 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="imageUpload" class="btn btn-info">
+                        <i class="fas fa-image"></i> Upload Image for Question
+                        <input type="file" name="image" style="display: none;" accept="image/*">
+                    </label>
+                </div>
+
+                <div class="mb-3">
                     <button type="submit" class="btn btn-success" id="submitQuestionsBtn">
                         <i class="fas fa-save"></i> Submit Questions
                     </button>
@@ -97,6 +104,14 @@
                                             D. {{ question.option_d }}
                                         </div>
                                     </div>
+
+
+                                    {% if question.image_path %}
+                                    <div class="mt-3">
+                                        <img src="{{ url_for('static', filename='uploads/' +  question.image_path) }}" alt="Question Image" class="img-fluid">
+                                    </div>
+                                    {% endif %}
+
                                 </div>
                             </div>
                         </div>
@@ -170,5 +185,12 @@ document.getElementById('questions-form').addEventListener('submit', function(ev
     function redirectToHint(url) {
         window.location.href = url;
     }
+   
+</script>
+<script>
+    function updateFileLabel(input) {
+    const fileChosen = document.getElementById('file-chosen');
+    fileChosen.textContent = input.files[0] ? input.files[0].name : 'No file chosen';
+}
 </script>
 {% endblock %}

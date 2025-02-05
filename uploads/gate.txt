@@ -1,0 +1,12 @@
+Given N distinct elements in an array determine the number of comparisons required to find the element which is not the largest ?, 2N − 1 , N - 1 , 0 , 1, A
+In a binary search tree with the following elements: (10 −4 15 13 20 5 16 19) the number of edges from node 19 to the root is?, 3 , 4, 2 ,5, B
+Consider a binary tree in which every node has either 0 or 2 children. Let N > 0 be the number of nodes in the tree. The number of nodes that have exactly 2 children is:, N+1/2,N−2/2 ,N/2,N−1/2,D
+Given the sequence: (5 6 15 _ 89 170 291) find the missing number.,30, 35,40, 45, A
+Bird: Nest :: Bee:___?, Hive, Colony, Den, Burrow, A
+What is included in the Instruction Set Architecture (ISA)?, Number of Registers, Clock Cycle Time or Frequency of CPU, Number of Cache Levels, Cache Size, C
+In an IPv4 packet if X is written in the protocol field which of the following is not a valid protocol X?, IGMP, ICMP , RIP, OSPF, A
+Let (L M) and N be non-singular matrices of size 3 × 3 such that L^2 = L^−1 & M = L^8 & N = L^2. Find |M − N|,0, 1, 2, 3, C
+Which of the following statements is true about the small signal voltage gain of MOSFET-based single-stage amplifiers?,Common source and common gate amplifiers are based on inverting amplifiers,Common source and common gate amplifiers are both non-inverting amplifiers,Common source amplifier is non-inverting and gate amplifier is inverting,Common source amplifier is inverting and common gate is non-inverting amplifier, B
+what is the capital of France?,Paris,London,Berlin,Madrid,A
+What is 2 + 2?,3,4,5,6,B
+What is the largest planet in our solar system?,Earth,Mars,Jupiter,Saturn,C
