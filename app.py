@@ -104,7 +104,11 @@ def tnpsc():
 
 @app.route('/sample')
 def sample():
-    return render_template('sample.html')    
+    return render_template('sample.html')   
+
+@app.route('/videos')
+def videos():
+    return render_template('videos.html') 
 
 @app.route('/branches/cse')
 def cse():
