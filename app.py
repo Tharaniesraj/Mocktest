@@ -220,6 +220,7 @@ def register():
             flash('Username already exists')
             return redirect(url_for('register'))
         
+
         # Create new user
         new_user = User(username=username, email=email)
         new_user.set_password(password)
