@@ -3,11 +3,12 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from functools import wraps
 from flask import abort
 import os
 from werkzeug.utils import secure_filename
 import re
+import smtplib
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'KSR_MOCK_TEST_APP_SECRET_KEY'
@@ -15,6 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mock_test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'txt', 'csv'}
+
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -48,12 +50,33 @@ class Question(db.Model):
     option_b = db.Column(db.String(255), nullable=False)
     option_c = db.Column(db.String(255), nullable=False)
     option_d = db.Column(db.String(255), nullable=False)
+    image_path = db.Column(db.String(100), nullable=True)
     correct_answer = db.Column(db.String(1), nullable=False)
+
+db.create_all()
 
 class ExamResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
+    score = db.Column(db.Float, nullable=False)
+    total_questions = db.Column(db.Integer, nullable=False)
+
+class QuestionImage(db.Model):
+    __tablename__ = 'question_image'
+    id = db.Column(db.Integer, primary_key=True)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
+    image_data = db.Column(db.Text, nullable=False)
+
+    def __init__(self, exam_id, image_data):
+        self.exam_id = exam_id
+        self.image_data = image_data
+
+class StudentRanking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
+    rank = db.Column(db.Integer, nullable=False)
     score = db.Column(db.Float, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
 
@@ -63,6 +86,7 @@ def load_user(user_id):
 
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
 
 def allowed_file(filename):
     """Check if the file has an allowed extension."""
@@ -82,7 +106,6 @@ def admin_required(f):
 # Routes
 @app.route('/')
 def index():
-    
     return render_template('index.html')
 
 @app.route('/library')
@@ -103,7 +126,11 @@ def tnpsc():
 
 @app.route('/sample')
 def sample():
-    return render_template('sample.html')    
+    return render_template('sample.html')   
+
+@app.route('/videos')
+def videos():
+    return render_template('videos.html') 
 
 @app.route('/branches/cse')
 def cse():
@@ -173,6 +200,10 @@ def aids():
 def group1():
     return render_template('branches/group1.html')
 
+@app.route('/branches/tancet')
+def tancet():
+    return render_template('branches/tancet.html')
+    
 @app.route('/branches/group2')
 def group2():
     return render_template('branches/group2.html')
@@ -197,6 +228,19 @@ def is_valid_college_email(email):
     # Check if the email ends with '@college'
     return email.endswith('@ksriet.ac.in') or email.endswith('@ksrce.ac.in')
     
+def send_ranking_email(rankings, admin_email):
+    subject = "Ranking Update"
+    body = "Here are the current rankings:\n\n" + "\n".join(rankings)
+    
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = 'cce@ksrce.ac.in'  # Replace with your email
+    msg['To'] = admin_email
+
+    with smtplib.SMTP('smtp.gmail.com', 587) as server:  # Replace with your SMTP server
+        server.starttls()
+        server.login('cce@ksrce.ac.in', 'Password@1234')  # Replace with your credentials
+        server.send_message(msg)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -247,6 +291,7 @@ def login():
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
+# route for dashboard
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -383,7 +428,6 @@ def manage_questions(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     questions = Question.query.filter_by(exam_id=exam_id).all()
     
-
     if request.method == 'POST':
         text = request.form['text']
         option_a = request.form['option_a']
@@ -501,7 +545,7 @@ def submit_questions():
                 db.session.rollback()
                 print(f"File upload error: {e}")
                 flash(f'Error processing file: {str(e)}', 'danger')
-    
+
     # Handle manual question entry
     questions = request.form.getlist('question[]')
     if questions:
@@ -518,7 +562,7 @@ def submit_questions():
             db.session.add(new_question)
         
         db.session.commit()
-        flash('Questions added successfully!', 'success')
+    flash('Questions added successfully!', 'success')
     
     return redirect(url_for('manage_questions', exam_id=exam_id))
 
