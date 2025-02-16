@@ -42,6 +42,13 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="imageUpload" class="btn btn-info">
+                        <i class="fas fa-image"></i> Upload Image for Question
+                        <input type="file" name="image" style="display: none;" accept="image/*">
+                    </label>
+                </div>
+
+                <div class="mb-3">
                     <button type="submit" class="btn btn-success" id="submitQuestionsBtn">
                         <i class="fas fa-save"></i> Submit Questions
                     </button>
@@ -77,7 +84,6 @@
                                         </form>
                                         
                                         <div class="question-container" data-hint="This is a hint for the question.">
-                                            
                                             <a href="https://docs.google.com/spreadsheets/d/1B1gPRscVu8JWtKZAaA_NlqmrCX2PmHqHGGGRYowhZXA/edit" class="btn btn-primary btn-sm" target="_blank">Show Hint</a>
                                             <div class="hint-display"></div>
                                         </div>
@@ -97,6 +103,14 @@
                                             D. {{ question.option_d }}
                                         </div>
                                     </div>
+
+
+                                    {% if question.image_path %}
+                                    <div class="mt-3">
+                                        <img src="{{ url_for('static', filename='uploads/' +  question.image_path) }}" alt="Question Image" class="img-fluid">
+                                    </div>
+                                    {% endif %}
+
                                 </div>
                             </div>
                         </div>
@@ -110,46 +124,6 @@
 </div>
 
 <script>
-function addQuestion() {
-    const container = document.getElementById('questions-container');
-    const newQuestionItem = document.createElement('div');
-    newQuestionItem.classList.add('question-item', 'mt-3', 'border', 'p-3');
-    newQuestionItem.innerHTML = `
-        <div class="row mb-3">
-            <div class="col-12">
-                <input type="text" name="question[]" class="form-control" placeholder="Enter your question" required />
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-6">
-                <input type="text" name="optionA[]" class="form-control" placeholder="Option A" required />
-            </div>
-            <div class="col-6">
-                <input type="text" name="optionB[]" class="form-control" placeholder="Option B" required />
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-6">
-                <input type="text" name="optionC[]" class="form-control" placeholder="Option C" required />
-            </div>
-            <div class="col-6">
-                <input type="text" name="optionD[]" class="form-control" placeholder="Option D" required />
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-12">
-                <select name="correctAnswer[]" class="form-control" required>
-                    <option value="">Select Correct Answer</option>
-                    <option value="A">Option A</option>
-                    <option value="B">Option B</option>
-                    <option value="C">Option C</option>
-                    <option value="D">Option D</option>
-                </select>
-            </div>
-        </div>
-    `;
-    container.appendChild(newQuestionItem);
-}
 
 function updateFileLabel(input) {
     const fileChosen = document.getElementById('file-chosen');
@@ -170,5 +144,12 @@ document.getElementById('questions-form').addEventListener('submit', function(ev
     function redirectToHint(url) {
         window.location.href = url;
     }
+   
+</script>
+<script>
+    function updateFileLabel(input) {
+    const fileChosen = document.getElementById('file-chosen');
+    fileChosen.textContent = input.files[0] ? input.files[0].name : 'No file chosen';
+}
 </script>
 {% endblock %}

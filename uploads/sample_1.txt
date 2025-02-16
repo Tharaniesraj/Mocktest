@@ -1,0 +1,16 @@
+If two distinct non-zero real variables 𝑥 and 𝑦 are such that (𝑥 + 𝑦) is proportional to (𝑥 − 𝑦) then the value of 𝑥/𝑦,depends on 𝑥y,depends only on 𝑥 and not on y,depends only on 𝑦 and not on x , is a constant, C
+
+Consider the following sample of numbers: 9 18 11 14 15 17 10 69 11 13 The median of the sample is, 13.5, 14, 11, 18.7, B
+
+A rectangular paper sheet of dimensions 54 cm × 4 cm is taken The two longer edges of the sheet are joined together to create a cylindrical tube A cube whose surface area is equal to the area of the sheet is also taken Then the ratio of the volume of the cylindrical tube to the volume of the cube is, 1 / pi , 2/ pi, 3/ pi, 4/ pi, A
+
+A rectangular paper of 20 cm × 8 cm is folded 3 times Each fold is made along the line of symmetry which is perpendicular to its long edge The perimeter of the final folded sheet (in cm) is,18, 24, 20, 21, D
+
+For positive non-zero real variables 𝑝 and 𝑞  if
+log (𝑝2 + 𝑞2) = log 𝑝 + log 𝑞 + 2 log 3 
+then the value of 𝑝4+𝑞4/𝑝2𝑞2 is , 79, 81, 9, 83, B
+
+
+
+
+

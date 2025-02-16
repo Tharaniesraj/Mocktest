@@ -27,10 +27,10 @@
                             <tr>
                                 <td>{{ ranking.rank }}</td>
                                 <td>{{ ranking.username }}</td>
-                                <td>{{ ranking.exam_name }}</td>
+                                <td>{{ ranking.exam_name }} ({{ ranking.department }})</td>
                                 <td>{{ ranking.score }}</td>
                                 <td>{{ ranking.total_questions }}</td>
-                                <td>100%</td>
+                                <td>{{ ranking.percentage }}%</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -43,10 +43,26 @@
             {% endif %}
         </div>
     </div>
+    <button class="btn btn-primary" onclick="sendRanking()">
+        <i class="fas fa-envelope"></i> Send Rankings to Admin
+    </button>
+
     <div class="text-center mt-3">
         <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
     </div>
 </div>
+<script>
+    function sendRanking() {
+        fetch('/send-ranking', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert('Ranking sent to admin!');
+                } else {
+                    alert('Failed to send ranking.');
+                }
+            });
+    }
+</script>
 {% endblock %}
