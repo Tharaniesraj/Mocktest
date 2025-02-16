@@ -3,7 +3,6 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from functools import wraps
 from flask import abort
 import os
 from werkzeug.utils import secure_filename
@@ -51,7 +50,10 @@ class Question(db.Model):
     option_b = db.Column(db.String(255), nullable=False)
     option_c = db.Column(db.String(255), nullable=False)
     option_d = db.Column(db.String(255), nullable=False)
+    image_path = db.Column(db.String(100), nullable=True)
     correct_answer = db.Column(db.String(1), nullable=False)
+
+db.create_all()
 
 class ExamResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -104,7 +106,6 @@ def admin_required(f):
 # Routes
 @app.route('/')
 def index():
-    
     return render_template('index.html')
 
 @app.route('/library')
@@ -125,7 +126,11 @@ def tnpsc():
 
 @app.route('/sample')
 def sample():
-    return render_template('sample.html')    
+    return render_template('sample.html')   
+
+@app.route('/videos')
+def videos():
+    return render_template('videos.html') 
 
 @app.route('/branches/cse')
 def cse():
@@ -286,6 +291,7 @@ def login():
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
+# route for dashboard
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -422,7 +428,6 @@ def manage_questions(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     questions = Question.query.filter_by(exam_id=exam_id).all()
     
-
     if request.method == 'POST':
         text = request.form['text']
         option_a = request.form['option_a']
@@ -557,7 +562,7 @@ def submit_questions():
             db.session.add(new_question)
         
         db.session.commit()
-        flash('Questions added successfully!', 'success')
+    flash('Questions added successfully!', 'success')
     
     return redirect(url_for('manage_questions', exam_id=exam_id))
 
