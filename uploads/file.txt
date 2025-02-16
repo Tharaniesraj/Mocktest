@@ -1,0 +1,12 @@
+
+Q.1 Visualize a cube that is held with one of the four body diagonals aligned to the vertical axis. Rotate the cube about this axis such that its view remains unchanged. The magnitude of the minimum angle of rotation is ?, 120°, 90°, 180°, 60°, A
+
+Q.2 Statements: 1. All heroes are winners. 2. All winners are lucky people. Inferences: 1. All lucky people are heroes. II. Some lucky people are heroes. III. Some winners are heroes. Which of the above inferences can be logically deduced from statements 1 and 2 ?, Only I and II, Only I and III, Only III , Only II and III, C
+
+Q.3 A student was supposed to multiply a positive real number p with another positive real number q Instead the student divided p by q. If the percentage error in the student's answer is 80% the value of q is ? , 2 , 5, √5, √2, B
+
+Q.4 If the sum of the first 20 consecutive positive odd numbers is divided by 202 the result is ? , 1 ,  1/2 , 20 ,  2, C 
+
+Q.5 The ratio of the number of girls to boys in class VIII is the same as the ratio of the number of boys to girls in class IX. The total number of students (boys and girls) in classes VIII and IX is 450 and 360 respectively. If the number of girls in classes VIII and IX is the same then the number of girls in each class is ?, 200 , 175 , 250 , 150 , A
+
+Q.6 In the given text the blanks are numbered (i)-(iv). Select the best match for all the blanks. Yoko Roi stands she stood (iii) (i) as an author for standing her writings that stand (iv) (ii) as an honorary fellow after the freedom of speech ?,  (i) down , (i) down , (i) out , (i) out (ii) out (ii) out (ii) down (ii) down (iii) by (iii) for (iii) in (iii) by (iv) in (iv) in (iv) for (iv) for
