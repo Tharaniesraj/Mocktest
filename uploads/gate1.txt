@@ -1,0 +1,7 @@
+5 + 2 ? ~ 7~ 9~ 5~ 4~A
+
+Visualize a cube that is held with one of the four body diagonals aligned to the vertical axis. Rotate the cube about this axis such that its view remains unchanged. The magnitude of the minimum angle of rotation is ?~ 120°~ 90°~ 180°~ 60°~ A
+
+Statements: 1. All heroes are winners. 2. All winners are lucky people. Inferences: 1. All lucky people are heroes. II. Some lucky people are heroes. III. Some winners are heroes. Which of the above inferences can be logically deduced from statements 1 and 2 ?~ Only I and II~ Only I and III~ Only III ~ Only II and III~ C
+
+The ratio of the number of girls to boys in class VIII is the same as the ratio of the number of boys to girls in class IX. The total number of students (boys and girls) in classes VIII and IX is 450 and 360 respectively. If the number of girls in classes VIII and IX is the same then the number of girls in each class is ?~ 200 ~ 175 ~ 250 ~ 150 ~ A

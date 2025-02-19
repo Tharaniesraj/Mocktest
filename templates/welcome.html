@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="text-center mt-4">
+        <h2>Choose Your Exam</h2>
+        <a href="{{ url_for('gate') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-book"></i> GATE
+        </a>
+        <a href="{{ url_for('tnpsc') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-book"></i> TNPSC
+        </a>
+        <a href="{{ url_for('upsc') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-book"></i> UPSC
+        </a>
+        <a href="{{ url_for('tancet') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-book"></i> TANCET
+        </a>
+        </div>
+        
+        <div class="text-center mt-4">
+            <h2>Reference Books</h2>
+        <a href="{{ url_for('library') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-book"></i> LIBRARY
+        </a>
+    </div>
+    
+    <div class="text-center mt-4">
+        <h2>Sample Questions</h2>
+        <a href="{{ url_for('sample') }}" class="btn btn-primary btn-lg mx-2">
+            <i class="fas fa-book"></i> Questions
+        </a>
+    </div>
+
+{% endblock %}
