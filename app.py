@@ -103,11 +103,7 @@ def tnpsc():
 
 @app.route('/sample')
 def sample():
-    return render_template('sample.html')  
-
-@app.route('/branches/tancet')
-def tancet():
-    return render_template('branches/tancet.html')      
+    return render_template('sample.html')    
 
 @app.route('/branches/cse')
 def cse():
@@ -148,6 +144,10 @@ def mba():
 @app.route('/branches/mca')
 def mca():
     return render_template('branches/mca.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/branches/ae')
 def ae():
@@ -479,7 +479,7 @@ def submit_questions():
                 # Process questions from file
                 for line_num, line in enumerate(questions_data, 1):
                     # Try multiple delimiters
-                    parts = [p.strip() for p in re.split(r'[~\t|]', line.strip())]
+                    parts = [p.strip() for p in re.split(r'[,\t|]', line.strip())]
                     
                     # More flexible parsing
                     if len(parts) >= 6:
@@ -559,7 +559,7 @@ def student_rankings():
                 'rank': idx,
                 'username': user.username,
                 'exam_name': exam.name,
-                'score': int(result.score),
+                'score': result.score,
                 'total_questions': result.total_questions,
                 'percentage': round(percentage, 2)
             })
