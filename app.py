@@ -103,7 +103,11 @@ def tnpsc():
 
 @app.route('/sample')
 def sample():
-    return render_template('sample.html')    
+    return render_template('sample.html')
+
+@app.route('/tancet')        
+def tancet():
+    return render_template('tancet.html')
 
 @app.route('/branches/cse')
 def cse():
@@ -189,9 +193,9 @@ def group3():
 def group4():
     return render_template('branches/group4.html')   
 
-@app.route('/branches/upsc')
+@app.route('/upsc')
 def upsc():
-    return render_template('branches/upsc.html')
+    return render_template('upsc.html')
 
 @app.route('/admin/courses')
 def courses():
@@ -338,6 +342,7 @@ def admin_dashboard():
     total_questions = Question.query.count()
     total_results = ExamResult.query.count()
     
+       
     return render_template('admin/dashboard.html', 
                          exams=exams,
                          total_users=total_users,
