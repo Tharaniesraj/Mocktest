@@ -484,7 +484,7 @@ def submit_questions():
                 # Process questions from file
                 for line_num, line in enumerate(questions_data, 1):
                     # Try multiple delimiters
-                    parts = [p.strip() for p in re.split(r'[,\t|]', line.strip())]
+                    parts = [p.strip() for p in re.split(r'[~\t|]', line.strip())]
                     
                     # More flexible parsing
                     if len(parts) >= 6:
